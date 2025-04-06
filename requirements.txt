@@ -4,3 +4,4 @@ pinecone==6.0.2
 spacy==3.8.4
 streamlit==1.44.1
 tqdm==4.66.6
+google-genai==1.9.0
