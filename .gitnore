@@ -1,0 +1,7 @@
+/old/
+
+/.streamlit/
+
+/__pycache__/
+database.py
+run.py
