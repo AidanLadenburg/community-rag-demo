@@ -1,9 +1,6 @@
 numpy==2.2.4
 openai==1.70.0
 pinecone==6.0.2
-protobuf==6.30.2
-sentence_transformers==3.4.1
 spacy==3.8.4
 streamlit==1.44.1
-torch==2.6.0+cu126
 tqdm==4.66.6
