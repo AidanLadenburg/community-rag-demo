@@ -2,7 +2,7 @@ import streamlit as st
 from RAG import CareerAdviceRAG
 
 st.set_page_config(
-    page_title="Career Pathfinder Chat",
+    page_title="Community RAG demo",
     page_icon="",
     layout="wide"
 )
