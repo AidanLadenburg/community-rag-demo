@@ -1,19 +1,9 @@
 from pinecone import Pinecone
 from google import genai
+from google.genai import types
 from typing import List, Dict, Any
-from sentence_transformers import SentenceTransformer
 
 PINECONE_INDEX_NAME = "community-rag"
-
-class CustomEmbeddings:
-    def __init__(self, model):
-        self.model = model
-
-    def embed_query(self, text):
-        return self.model.encode(text).tolist()
-
-    def embed_documents(self, texts):
-        return [self.model.encode(text).tolist() for text in texts]
 
 class CareerAdviceRAG:
     def __init__(self, pin, gog):
@@ -21,17 +11,23 @@ class CareerAdviceRAG:
         GOOGLE_API_KEY = gog
         pc = Pinecone(PINECONE_API_KEY)
         self.index = pc.Index(PINECONE_INDEX_NAME)
-        self.embed_model = SentenceTransformer("Alibaba-NLP/gte-large-en-v1.5", trust_remote_code=True, device='cuda').cuda()
 
         self.client = genai.Client(api_key=GOOGLE_API_KEY)
         self.chat = self.client.chats.create(model="gemini-2.0-flash")
-        self.embedder = CustomEmbeddings(self.embed_model)
         
         self.conversation_history = []
     
+    def google_embed(self, text):
+        result = self.client.models.embed_content(
+                model="models/text-embedding-004", # text-embedding-large-exp-03-07
+                contents=text,
+                config=types.EmbedContentConfig(task_type="RETRIEVAL_QUERY") #RETRIEVAL_QUERY, QUESTION_ANSWERING
+        )
+        return result.embeddings[0].values
+
     def retrieveal(self, query: str, top_k: int = 1) -> List[Dict]:
         """Retrieve the most relevant chunks from the vector database."""
-        query_embedding = self.embedder.embed_query(query)
+        query_embedding = self.google_embed(query)
         results = self.index.query(
             vector=query_embedding,
             top_k=top_k,
