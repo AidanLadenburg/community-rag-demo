@@ -87,16 +87,16 @@ class CareerAdviceRAG:
         self.conversation_history.append({"role": "user", "content": user_query})
         
         rephrased_query = self.rephrase_query(self.conversation_history, user_query)
-        print("REPHRASED: ", rephrased_query, "\n\n\n")
+        print("REPHRASED: ", rephrased_query)
 
         relevant_chunks, context = self.retrieveal(rephrased_query, top_k=1)  
 
-        print("SOURCEEEEE", relevant_chunks[0]["source"])
+        print("SOURCE:", relevant_chunks[0]["source"])
 
         message = f"""Here is the student's question: {user_query}
         Here are the transcripts:\n {context}
         """
-        print(message)
+        print("FULL MESSAGE:", message)
         response = self.chat.send_message(message).text
         
         self.conversation_history.append({"role": "assistant", "content": response})
