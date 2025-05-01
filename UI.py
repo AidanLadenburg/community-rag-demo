@@ -1,5 +1,8 @@
 import streamlit as st
 from RAG import CareerAdviceRAG
+import streamlit.components.v1 as components
+import urllib.parse
+import re
 
 st.set_page_config(
     page_title="Community RAG demo",
@@ -13,6 +16,38 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 if 'pending_user_message' not in st.session_state:
     st.session_state.pending_user_message = None
+if 'soundcloud_source' not in st.session_state:
+    st.session_state.soundcloud_source = ""
+if 'message' not in st.session_state:
+    st.session_state.message = ""
+def extract_timestamp(message):
+    match = re.search(r"\b(\d+):(\d+)\b", message)
+    if match:
+        minutes = int(match.group(1))
+        seconds = int(match.group(2))
+        return (minutes * 60 + seconds) * 1000  # Convert to milliseconds
+    return 0  # default if no timestamp found
+def generate_soundcloud_embed(share_url, seek_ms=0):
+    """
+    Converts a SoundCloud share link into an HTML embed iframe with optional seek time.
+    """
+    import urllib.parse
+    encoded_url = urllib.parse.quote(share_url, safe='')
+    embed_code = f"""
+    <iframe id="sc-player" width="50%" height="166" scrolling="no" frameborder="no" allow="autoplay"
+    src="https://w.soundcloud.com/player/?url={encoded_url}&color=%23ff5500&inverse=false&auto_play=false&show_user=true">
+    </iframe>
+    <script src="https://w.soundcloud.com/player/api.js"></script>
+    <script>
+        var iframeElement = document.getElementById('sc-player');
+        var widget = SC.Widget(iframeElement);
+
+        widget.bind(SC.Widget.Events.READY, function() {{
+            widget.seekTo({seek_ms});
+        }});
+    </script>
+    """
+    return embed_code.strip()
 
 st.markdown("""
 <style>
@@ -21,6 +56,7 @@ body {
     color: #ffffff;
     font-family: sans-serif;
 }
+            
 .chat-container {
     margin-bottom: 100px;
     padding-bottom: 20px;
@@ -46,6 +82,7 @@ body {
 </style>
 """, unsafe_allow_html=True)
 
+
 st.sidebar.title("Community RAG")
 st.sidebar.markdown("Desc here")
 
@@ -64,7 +101,7 @@ st.markdown("Description")
 
 with st.container():
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
-    for message in st.session_state.chat_history:
+    for i, message in enumerate(st.session_state.chat_history):
         if message["role"] == "user":
             st.markdown(
                 f'<div style="display: flex; justify-content: flex-end;">'
@@ -79,6 +116,10 @@ with st.container():
                 f'</div>',
                 unsafe_allow_html=True
             )
+            if i == len(st.session_state.chat_history) - 1 and st.session_state.soundcloud_source:
+                seek_ms = st.session_state.get("timestamp_ms", 0)
+                components.html(generate_soundcloud_embed(st.session_state.soundcloud_source, seek_ms=seek_ms), height=200)
+
     st.markdown('</div>', unsafe_allow_html=True)
 
 user_input = st.chat_input("Type your message here:")
@@ -89,7 +130,12 @@ if user_input:
 
 if st.session_state.pending_user_message:
     with st.spinner("Getting insights from professionals..."):
-        response = st.session_state.rag_system.generate_response(st.session_state.pending_user_message)
+        response, source = st.session_state.rag_system.generate_response(st.session_state.pending_user_message)
+
+    timestamp_ms = extract_timestamp(response)
+
     st.session_state.chat_history.append({"role": "assistant", "content": response})
+    st.session_state.soundcloud_source = source
+    st.session_state.timestamp_ms = timestamp_ms  # store seek time
     st.session_state.pending_user_message = None
     st.rerun()

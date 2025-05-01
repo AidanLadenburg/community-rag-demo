@@ -2,13 +2,14 @@ from pinecone import Pinecone
 from google import genai
 from google.genai import types
 from typing import List, Dict, Any
+import streamlit as st
 
 PINECONE_INDEX_NAME = "community-rag"
 
 class CareerAdviceRAG:
     def __init__(self, pin, gog):
-        PINECONE_API_KEY = pin
-        GOOGLE_API_KEY = gog
+        PINECONE_API_KEY = st.secrets["PINECONE_API_KEY"]
+        GOOGLE_API_KEY = st.secrets["GOOGLE_API_KEY"]
         pc = Pinecone(PINECONE_API_KEY)
         self.index = pc.Index(PINECONE_INDEX_NAME)
 
@@ -19,7 +20,7 @@ class CareerAdviceRAG:
     
     def google_embed(self, text):
         result = self.client.models.embed_content(
-                model="models/text-embedding-004", # text-embedding-large-exp-03-07
+                model="models/text-embedding-004", #text-embedding-large-exp-03-07
                 contents=text,
                 config=types.EmbedContentConfig(task_type="RETRIEVAL_QUERY") #RETRIEVAL_QUERY, QUESTION_ANSWERING
         )
@@ -98,11 +99,11 @@ class CareerAdviceRAG:
         """
         print("FULL MESSAGE:", message)
         response = self.chat.send_message(message).text
-        
+        source = relevant_chunks[0]["source"]
         self.conversation_history.append({"role": "assistant", "content": response})
 
         print("---"*20)
-        return response
+        return response, source
     
     def get_conversation_history(self) -> List[Dict]:
         """Return the current conversation history."""
