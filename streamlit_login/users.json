@@ -1,0 +1,14 @@
+{
+    "admin": {
+        "password": "password123",
+        "linkedin": "https://www.linkedin.com/in/zahra-petiwala"
+    },
+    "zahra": {
+        "password": "abcd1234",
+        "linkedin": "https://www.linkedin.com/in/zahra-petiwala"
+    },
+    "zahra2002": {
+        "password": "abcd",
+        "linkedin": "https://www.linkedin.com/in/zahra-petiwala"
+    }
+}
