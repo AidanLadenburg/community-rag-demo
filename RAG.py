@@ -103,7 +103,7 @@ class CareerAdviceRAG:
         self.conversation_history.append({"role": "assistant", "content": response})
 
         print("---"*20)
-        return response, source
+        return response, source, message
     
     def get_conversation_history(self) -> List[Dict]:
         """Return the current conversation history."""

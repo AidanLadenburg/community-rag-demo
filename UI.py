@@ -20,13 +20,14 @@ if 'soundcloud_source' not in st.session_state:
     st.session_state.soundcloud_source = ""
 if 'message' not in st.session_state:
     st.session_state.message = ""
+
 def extract_timestamp(message):
-    match = re.search(r"\b(\d+):(\d+)\b", message)
+    match = re.search(r"(\d{1,2}):(\d{2})", message)
     if match:
         minutes = int(match.group(1))
         seconds = int(match.group(2))
-        return (minutes * 60 + seconds) * 1000  # Convert to milliseconds
-    return 0  # default if no timestamp found
+        return (minutes * 60 + seconds) * 1000  # milliseconds
+    return 0
 def generate_soundcloud_embed(share_url, seek_ms=0):
     """
     Converts a SoundCloud share link into an HTML embed iframe with optional seek time.
@@ -130,9 +131,8 @@ if user_input:
 
 if st.session_state.pending_user_message:
     with st.spinner("Getting insights from professionals..."):
-        response, source = st.session_state.rag_system.generate_response(st.session_state.pending_user_message)
-
-    timestamp_ms = extract_timestamp(response)
+        response, source, message = st.session_state.rag_system.generate_response(st.session_state.pending_user_message)
+    timestamp_ms = extract_timestamp(message)
 
     st.session_state.chat_history.append({"role": "assistant", "content": response})
     st.session_state.soundcloud_source = source
