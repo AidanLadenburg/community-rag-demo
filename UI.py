@@ -85,7 +85,7 @@ body {
 
 
 st.sidebar.title("Community RAG")
-st.sidebar.markdown("Desc here")
+st.sidebar.markdown("") #ADD desc
 
 with st.sidebar.expander("Your Information (Optional)"):
     student_name = st.text_input("Name")
@@ -98,7 +98,7 @@ if st.sidebar.button("Start New Conversation"):
     st.session_state.pending_user_message = None
 
 st.title("Community RAG demo")
-st.markdown("Description")
+st.markdown("") #ADD description
 
 with st.container():
     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
